@@ -1,0 +1,103 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+/* garante que a  borda e o preenchimento sejam incluídos na largura e altura total dos elementos */
+
+/* ESTILO GERAIS DA PÁGINA */
+body {
+    font-family: 'SEGOE UI', Arial, Helvetica, sans-serif;
+    background-color: #f4f4f4;
+    color: #333333;
+    line-height: 1.6; 
+   
+}
+
+/* CABEÇALHO HEADER) */
+header {
+    background-color: #004a80;
+    color: #ffffff;
+    padding: 30px 20px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+header h1 {
+    font-size: 2.5em;
+    margin-bottom: 15px;
+    letter-spacing: 2px;
+}
+
+/* NAVEGAÇÃO */
+nav {
+    Display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15 px; 
+
+}
+nav a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 5px;
+    ;
+}
+nav a:hover {
+    background-color: #ffcc00;
+    color: #004a8d;
+    transform:translateY(-10px)
+}
+/* SEÇÃO PRINCIPAL */
+main {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px;
+}       
+/*ARTIGOS E SEÇÕES */
+article, section {
+    background-color: #ffffff;
+    padding: 25px;
+    margin-bottom: 30px;
+    border-radius: 10px;
+}
+article h2, section h3{
+    color: #004a8d;
+    margin-bottom: 15px;
+}
+article img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #e0e0e0;
+}
+/*LISTAS E OUTRAS NOTICIAS */
+section ul {
+    list-style: none;
+}
+section ul li {
+    padding: 12px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+section ul li:last-child {
+    border-bottom: none;
+}
+
+/* RODAPÉ */
+footer {
+    background-color: #222222;
+    color: #cccccc;
+    text-align: center;
+    padding: 30px 20px ;
+    margin-top: 50px;
+}
+footer hr {
+    border: none;
+  text-decoration: none;
+  margin-bottom: 20px;
+}
+footer a {
+    color: #ffcc00;
+    text-decoration: none;
+    font-weight: bold;
+}
+footer a:hover {
+    text-decoration: underline;
+}
