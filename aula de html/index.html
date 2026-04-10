@@ -1,43 +1,277 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="style.css">
-    <title>Portal de Notícias Técnico</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Central J1 | Portal de Notícias</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <header>
-        <h1>Tech News Senac</h1>
-        <nav>
-            <a href="home.html">Home</a> | 
-            <a href="cursos.html">Cursos</a> | 
-            <a href="contato.html">Contato</a>
-        </nav>
-    </header>
+  <header class="header">
+    <div class="container header-wrap">
+      <div class="logo">
+        <img src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&w=200&q=80" alt="Logo Central J1">
+        <span>Central J1</span>
+      </div>
 
-    <main>
-        <article>
-            <h2>A Revolução do HTML5 na Web Moderna</h2>
-            <img src="data:image/jpeg;base64,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" alt="Logo do HTML5">
-            <p>O HTML5 trouxe <strong>novas tags semânticas</strong> que facilitam a vida dos desenvolvedores e melhoram a acessibilidade.</p>
-        </article>
+      <nav class="menu">
+        <a href="index.html" class="active">Home</a>
+        <a href="noticias.html">Notícias</a>
+        <a href="tecnologia.html">Tecnologia</a>
+      </nav>
 
-        <section>
-            <h3>Outras Notícias</h3>
-            <ul>
-                <li>Dicas de como usar o VS Code.</li>
-                <li>O mercado de TI em 2026.</li>
-                <li>Por que aprender lógica de programação?</li>
-            </ul>
-        </section>
-    </main>
+      <div class="header-actions">
+        <a href="login.html" class="btn-perfil">Perfil</a>
+      </div>
+    </div>
+  </header>
 
-    <footer>
-        <hr>
-        <p>Desenvolvido por: Junior Müller - 2026</p>
-        <p><a href="mailto:contato@escola.com">Enviar E-mail</a></p>
-    </footer>
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <span class="badge">• Informação em destaque</span>
+        <h1>O seu portal completo de notícias, esportes e tecnologia</h1>
+        <p>
+          Acompanhe os principais destaques do momento com uma experiência visual mais moderna,
+          profissional e organizada, em um portal pensado para impressionar.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#destaques" class="btn-primary">Explorar portal</a>
+          <a href="#categorias" class="btn-secondary">Ver editorias</a>
+        </div>
+
+        <div class="hero-cards">
+          <div class="hero-mini-card">
+            <strong>+120</strong>
+            <span>Manchetes em destaque</span>
+          </div>
+          <div class="hero-mini-card">
+            <strong>24h</strong>
+            <span>Conteúdo sempre atualizado</span>
+          </div>
+          <div class="hero-mini-card">
+            <strong>3 áreas</strong>
+            <span>Notícias, Esportes e Tech</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="strip">
+    <div class="container strip-wrap">
+      <div class="strip-box">
+        <strong>Portal profissional</strong>
+        <span>Layout limpo e moderno</span>
+      </div>
+      <div class="strip-box">
+        <strong>Visual atraente</strong>
+        <span>Imagens e cards elegantes</span>
+      </div>
+      <div class="strip-box">
+        <strong>Responsivo</strong>
+        <span>Funciona bem no celular</span>
+      </div>
+      <div class="strip-box">
+        <strong>Fácil de editar</strong>
+        <span>Estrutura pronta para personalizar</span>
+      </div>
+    </div>
+  </section>
+
+  <main>
+    <section class="section" id="destaques">
+      <div class="container">
+        <div class="section-title">
+          <span>Destaques</span>
+          <h2>As principais manchetes do dia</h2>
+          <p>Uma seleção de conteúdos em evidência para deixar a sua home com cara de portal real.</p>
+        </div>
+
+        <div class="grid grid-2-1">
+          <article class="card featured">
+            <div class="card-image">
+              <img src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1400&q=80" alt="Notícia principal">
+            </div>
+            <div class="card-body">
+              <span class="card-tag">Destaque principal</span>
+              <h3>Informação de qualidade e apresentação profissional fazem toda a diferença em um portal moderno</h3>
+              <p>
+                Um site bem estruturado, com imagens fortes, navegação simples e seções bem organizadas,
+                transmite mais credibilidade e chama mais atenção logo no primeiro acesso.
+              </p>
+              <a href="noticias.html" class="card-link">Ir para notícias</a>
+            </div>
+          </article>
+
+          <div class="compact-list">
+            <article class="compact-item">
+              <img src="https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=600&q=80" alt="Tecnologia">
+              <div>
+                <h4>Tecnologia continua moldando o futuro da informação</h4>
+                <p>IA, inovação digital e conectividade mudam a forma como consumimos conteúdo.</p>
+              </div>
+            </article>
+
+            <article class="compact-item">
+              <img src="https://images.unsplash.com/photo-1547347298-4074fc3086f0?auto=format&fit=crop&w=600&q=80" alt="Esportes">
+              <div>
+                <h4>Grandes eventos esportivos seguem dominando o interesse do público</h4>
+                <p>Competições, torcidas e atletas em alta movimentam o cenário esportivo.</p>
+              </div>
+            </article>
+
+            <article class="compact-item">
+              <img src="https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=600&q=80" alt="Atualidades">
+              <div>
+                <h4>Atualidades exigem leitura rápida, clara e visualmente organizada</h4>
+                <p>Um bom portal facilita a navegação e valoriza cada conteúdo publicado.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="categorias">
+      <div class="container">
+        <div class="section-title">
+          <span>Editorias</span>
+          <h2>Explore por categoria</h2>
+          <p>Blocos visuais para destacar as principais áreas do seu portal.</p>
+        </div>
+
+        <div class="categories">
+          <a class="category-box" href="noticias.html" style="background-image: url('https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=900&q=80');">
+            <div class="category-content">
+              <h3>Notícias</h3>
+              <p>Atualidades, manchetes e assuntos do momento.</p>
+            </div>
+          </a>
+
+          <a class="category-box" href="esportes.html" style="background-image: url('https://images.unsplash.com/photo-1547347298-4074fc3086f0?auto=format&fit=crop&w=900&q=80');">
+            <div class="category-content">
+              <h3>Esportes</h3>
+              <p>Campeonatos, atletas e destaques esportivos.</p>
+            </div>
+          </a>
+
+          <a class="category-box" href="tecnologia.html" style="background-image: url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80');">
+            <div class="category-content">
+              <h3>Tecnologia</h3>
+              <p>Inovação, inteligência artificial e mundo digital.</p>
+            </div>
+          </a>
+
+          <a class="category-box" href="login.html" style="background-image: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80');">
+            <div class="category-content">
+              <h3>Acesso</h3>
+              <p>Entre no portal com uma interface visual moderna.</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-title">
+          <span>Mais lidas</span>
+          <h2>Conteúdos em destaque</h2>
+        </div>
+
+        <div class="grid grid-3">
+          <article class="card standard">
+            <div class="card-image">
+              <img src="https://images.unsplash.com/photo-1516321165247-4aa89a48be28?auto=format&fit=crop&w=900&q=80" alt="Conteúdo digital">
+            </div>
+            <div class="card-body">
+              <span class="card-tag">Portal</span>
+              <h3>Design atrativo aumenta o impacto visual do seu site</h3>
+              <p>Uma boa composição visual transmite profissionalismo e valoriza o conteúdo publicado.</p>
+              <a href="noticias.html" class="card-link">Saiba mais</a>
+            </div>
+          </article>
+
+          <article class="card standard">
+            <div class="card-image">
+              <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80" alt="Tecnologia e programação">
+            </div>
+            <div class="card-body">
+              <span class="card-tag">Tecnologia</span>
+              <h3>Estrutura limpa em HTML e CSS facilita personalização</h3>
+              <p>Com uma base bem montada, fica mais simples evoluir o projeto depois.</p>
+              <a href="tecnologia.html" class="card-link">Ver tecnologia</a>
+            </div>
+          </article>
+
+          <article class="card standard">
+            <div class="card-image">
+              <img src="https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=900&q=80" alt="Esportes e estádio">
+            </div>
+            <div class="card-body">
+              <span class="card-tag">Esportes</span>
+              <h3>Visual esportivo forte deixa a página mais dinâmica</h3>
+              <p>Fotos impactantes ajudam a dar vida ao conteúdo esportivo do portal.</p>
+              <a href="esportes.html" class="card-link">Ver esportes</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="cta">
+          <h2>Um portal com cara profissional de verdade</h2>
+          <p>
+            Essa estrutura já está pronta para você apresentar, editar e evoluir. Basta trocar textos,
+            imagens, logo e links para deixar com a sua identidade.
+          </p>
+          <a href="login.html" class="btn-primary">Entrar no portal</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer" id="contato">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">
+            <img src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&w=200&q=80" alt="Logo Central J1">
+            <span>Central J1</span>
+          </div>
+          <p>Portal moderno com foco em notícias, tecnologia e esportes, com visual mais elegante e organizado.</p>
+        </div>
+
+        <div class="footer-column">
+          <h4>Navegação</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="noticias.html">Notícias</a></li>
+            <li><a href="esportes.html">Esportes</a></li>
+            <li><a href="tecnologia.html">Tecnologia</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4>Contato</h4>
+          <div class="contact-nav">
+            <a href="mailto:seuemail@email.com?subject=Contato com a Central J1&body=Olá, gostaria de falar com a equipe da Central J1." aria-label="Enviar e-mail de contato">
+              📩 Fale Conosco
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        Junior Maia - 2026
+      </div>
+    </div>
+  </footer>
 
 </body>
 </html>
