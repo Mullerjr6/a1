@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "titulo": "Dom Casmurro",
+    "autor": "Machado de Assis",
+    "ano": 1899,
+    "lido": false
+  },
+  {
+    "id": 2,
+    "titulo": "O enigma do príncipe",
+    "autor": "j.k. Rowling",
+    "ano": 2000,
+    "lido": true
+  }
+]
