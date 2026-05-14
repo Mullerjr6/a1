@@ -1,0 +1,3 @@
+[2026-05-11T22:48:23.019Z] Iniciando o programa
+[2026-05-11T22:48:23.057Z] Produto adicionado com sucesso
+[2026-05-11T22:48:23.057Z] Erro ao calcular desconto
