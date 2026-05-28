@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pokedex Müller</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="ambient"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#inicio">
+      <span class="pokeball"></span>
+      <span>
+          <strong>Pokedex Müller</strong>
+        <small>Müller Battle Lab</small>
+      </span>
+    </a>
+
+    <nav class="main-nav">
+      <a href="#inicio" class="nav-link active">Inicio</a>
+      <a href="#colecao" class="nav-link">Colecao</a>
+      <a href="#criar" class="nav-link">Criar</a>
+      <a href="#treino" class="nav-link">Treino</a>
+      <a href="#arena" class="nav-link">Arena</a>
+    </nav>
+
+    <div class="stats-strip">
+      <span><b id="totalCards">0</b> cartas</span>
+      <span><b id="rareCards">0</b> raras+</span>
+      <span><b id="totalPower">0</b> poder</span>
+    </div>
+  </header>
+
+  <main>
+    <section id="inicio" class="page active-page">
+      <div class="hero-grid hero-grid-clean">
+        <section class="hero-card glass">
+          <p class="eyebrow">Nova temporada</p>
+          <h1>Monte seu deck, treine golpes e venca duelos taticos.</h1>
+          <p>
+            Cartas 3D com brilho por raridade, criacao personalizada, treino de ataques
+            e uma arena por turnos com energia, critico, defesa, status e vantagens de tipo.
+          </p>
+          <div class="hero-actions">
+            <button class="btn" data-go="colecao">Abrir colecao</button>
+            <button class="btn secondary" data-go="arena">Entrar na arena</button>
+          </div>
+        </section>
+
+        <aside class="hero-pokedex glass">
+          <div class="pokedex-lights">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <strong>Arena, treino e colecao em um deck unico.</strong>
+          <p>Escolha cartas, suba golpes de nivel e entre em duelos com vantagem por tipo.</p>
+        </aside>
+      </div>
+
+      <section class="section-block">
+        <div class="section-heading">
+          <p class="eyebrow">Destaques</p>
+          <h2>Top cartas do deck</h2>
+        </div>
+        <div class="cards compact-cards" id="featuredCards"></div>
+      </section>
+    </section>
+
+    <section id="colecao" class="page">
+      <div class="page-grid">
+        <aside class="side-stack">
+          <section class="panel glass">
+            <h3>Carta ativa</h3>
+            <div id="collectionPreview"></div>
+            <button class="btn full" data-go="treino">Treinar carta</button>
+          </section>
+
+          <section class="panel glass">
+            <h3>Filtros</h3>
+
+            <label>
+              Buscar
+              <input id="searchInput" placeholder="Nome ou raca" />
+            </label>
+
+            <label>
+              Tipo
+              <select id="typeFilter"></select>
+            </label>
+
+            <label>
+              Raridade
+              <select id="rarityFilter"></select>
+            </label>
+
+            <div class="button-row">
+              <button class="btn secondary" id="starterBtn">Repor base</button>
+              <button class="btn danger" id="clearBtn">Resetar</button>
+            </div>
+          </section>
+        </aside>
+
+        <section class="collection">
+          <div class="section-heading row">
+            <div>
+              <p class="eyebrow">Deck atual</p>
+              <h2>Todas as cartas</h2>
+            </div>
+            <button class="btn" data-go="criar">Criar nova</button>
+          </div>
+
+          <div class="cards" id="cards"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="criar" class="page">
+      <div class="creator-layout">
+        <section class="panel glass">
+          <p class="eyebrow">Nova carta</p>
+          <h2>Crie seu Pokemon</h2>
+
+          <form id="createForm">
+            <div class="two-fields">
+              <label>
+                Nome
+                <input id="pokeName" maxlength="18" required placeholder="Flamarino" />
+              </label>
+
+              <label>
+                Raca
+                <input id="pokeRace" maxlength="22" required placeholder="Dragao Solar" />
+              </label>
+            </div>
+
+            <div class="three-fields">
+              <label>
+                Tipo
+                <select id="pokeType"></select>
+              </label>
+
+              <label>
+                Raridade
+                <select id="pokeRarity"></select>
+              </label>
+
+              <label>
+                HP
+                <input id="pokeHp" type="number" min="30" max="220" value="90" />
+              </label>
+            </div>
+
+            <label>
+              Arte base
+              <select id="pokeLook"></select>
+            </label>
+
+            <div class="button-row">
+              <button class="btn" type="submit">Adicionar</button>
+              <button class="btn secondary" id="randomBtn" type="button">Gerar ideia</button>
+            </div>
+          </form>
+        </section>
+
+        <aside class="preview-stage">
+          <div class="section-heading">
+            <p class="eyebrow">Preview 3D</p>
+            <h2>Sua carta</h2>
+          </div>
+          <div id="previewCard"></div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="treino" class="page">
+      <div class="training-layout">
+        <aside class="side-stack">
+          <section class="panel glass">
+            <h3>Escolher carta</h3>
+            <label>
+              Carta
+              <select id="pokemonSelect"></select>
+            </label>
+          </section>
+
+          <section class="panel glass trainer-card" id="trainerCard"></section>
+        </aside>
+
+        <section class="training-arena">
+          <div class="section-heading row">
+            <div>
+              <p class="eyebrow">Dojo</p>
+              <h2 id="arenaTitle">Treinar ataques</h2>
+            </div>
+            <button class="btn secondary" id="restBtn">Descansar +35 energia</button>
+          </div>
+
+          <div class="progress-board">
+            <div>
+              <span>Experiencia</span>
+              <div class="progress-track"><b id="xpBar"></b></div>
+            </div>
+
+            <div>
+              <span>Energia</span>
+              <div class="progress-track energy"><b id="energyBar"></b></div>
+            </div>
+          </div>
+
+          <div class="move-grid" id="moveGrid"></div>
+
+          <section class="panel glass log-panel">
+            <h3>Historico</h3>
+            <div id="trainingLog"></div>
+          </section>
+        </section>
+      </div>
+    </section>
+
+    <section id="arena" class="page">
+      <div class="arena-shell">
+        <section class="panel glass arena-setup" id="setupPanel">
+          <div class="section-heading row">
+            <div>
+              <p class="eyebrow">Modo duelo</p>
+              <h2>Escolha ate 3 cartas</h2>
+            </div>
+            <button class="btn" id="startBattleBtn">Iniciar duelo</button>
+          </div>
+
+          <div class="arena-options">
+            <label>
+              Oponente
+              <select id="opponentSelect"></select>
+            </label>
+
+            <label>
+              Regra
+              <select id="duelMode">
+                <option value="standard">Padrao - 4000 LP</option>
+                <option value="rapid">Rapido - 2500 LP</option>
+                <option value="boss">Chefe - 5000 LP</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="team-count" id="teamCount">0/3 selecionados</div>
+          <div class="team-picker" id="teamPicker"></div>
+        </section>
+
+        <section class="duel-board hidden" id="battlePanel">
+          <div class="duel-status">
+            <div class="duelist enemy">
+              <span id="enemyName">Oponente</span>
+              <strong><b id="enemyLp">4000</b> LP</strong>
+            </div>
+
+            <div class="turn-badge" id="turnBadge">Seu turno</div>
+
+            <div class="duelist player">
+              <span>Treinador</span>
+              <strong><b id="playerLp">4000</b> LP</strong>
+            </div>
+          </div>
+
+          <div class="field-zone opponent-zone">
+            <div class="bench-row" id="enemyBench"></div>
+            <div class="duel-card-slot" id="enemyActive"></div>
+          </div>
+
+          <div class="battle-center glass">
+            <div class="battle-message" id="battleMessage">Duelistas prontos.</div>
+            <div class="duel-actions" id="duelActions"></div>
+          </div>
+
+          <div class="field-zone player-zone">
+            <div class="duel-card-slot" id="playerActive"></div>
+            <div class="bench-row" id="playerBench"></div>
+          </div>
+
+          <section class="panel glass log-panel arena-log">
+            <h3>Registro do duelo</h3>
+            <div id="battleLog"></div>
+          </section>
+        </section>
+
+        <section class="panel glass result-panel hidden" id="resultPanel">
+          <p class="eyebrow" id="resultEyebrow">Fim do duelo</p>
+          <h2 id="resultTitle">Resultado</h2>
+          <p id="resultText"></p>
+          <div class="hero-actions">
+            <button class="btn" id="restartBtn">Novo duelo</button>
+            <button class="btn secondary" data-go="colecao">Voltar a colecao</button>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
