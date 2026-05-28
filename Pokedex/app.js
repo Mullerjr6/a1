@@ -1,6 +1,7 @@
 const BASE_ARTE = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork";
 const CHAVE_CARTAS = "pokedex-cartas-v6";
 const CHAVE_SELECIONADA = "pokedex-carta-selecionada-v6";
+const CHAVE_BATALHA = "pokedex-batalha-v1";
 
 const LIMITES = {
   nome: 18,
@@ -938,6 +939,18 @@ function turnoRival() {
 }
 
 function iniciarDuelo() {
+  duelo.oponente = oponentes.find(oponente => oponente.id === document.querySelector("#opponentSelect").value) || oponentes[0];
+  duelo.modo = document.querySelector("#duelMode").value;
+  if (!duelo.escolhidas.length) return;
+  sessionStorage.setItem(CHAVE_BATALHA, JSON.stringify({
+    escolhidas: duelo.escolhidas,
+    oponente: duelo.oponente.id,
+    modo: duelo.modo
+  }));
+  window.location.href = "batalha.html";
+}
+
+function iniciarDueloNaPagina() {
   duelo.oponente = oponentes.find(oponente => oponente.id === document.querySelector("#opponentSelect").value) || oponentes[0];
   duelo.modo = document.querySelector("#duelMode").value;
   const lp = lpModo();
