@@ -14,22 +14,22 @@
       <span class="pokeball"></span>
       <span>
           <strong>Pokedex Müller</strong>
-        <small>Müller Battle Lab</small>
+        <small>Müller Battle Lab and collection</small>
       </span>
     </a>
 
     <nav class="main-nav">
       <a href="#inicio" class="nav-link active">Inicio</a>
-      <a href="#colecao" class="nav-link">Colecao</a>
+      <a href="#colecao" class="nav-link">Coleção</a>
       <a href="#criar" class="nav-link">Criar</a>
       <a href="#treino" class="nav-link">Treino</a>
       <a href="#arena" class="nav-link">Arena</a>
     </nav>
 
     <div class="stats-strip">
-      <span><b id="totalCards">0</b> cartas</span>
-      <span><b id="rareCards">0</b> raras+</span>
-      <span><b id="totalPower">0</b> poder</span>
+      <span><b id="totalCards">0</b> itens</span>
+      <span><b id="duplicateCards">0</b> repetidos</span>
+      <span><b id="uniqueCards">0</b> unicos</span>
     </div>
   </header>
 
@@ -43,7 +43,7 @@
           Explore uma colecao unica de cartas, suba ataques de nivel e desafie oponentes em batalhas estrategicas com vantagem por tipo.
           </p>
           <div class="hero-actions">
-            <button class="btn" data-go="colecao">Abrir colecao</button>
+            <button class="btn" data-go="colecao">Abrir coleção</button>
             <button class="btn secondary" data-go="arena">Entrar na arena</button>
           </div>
         </section>
@@ -54,7 +54,7 @@
             <span></span>
             <span></span>
           </div>
-          <strong>Arena, treino e colecao em um deck unico.</strong>
+          <strong>Arena, treino e coleção em um deck unico.</strong>
           <p>Escolha cartas, suba golpes de nivel e entre em duelos com vantagem por tipo.</p>
         </aside>
       </div>
@@ -130,7 +130,7 @@
               </label>
 
               <label>
-                Raca
+                Raça
                 <input id="pokeRace" maxlength="22" required placeholder="Dragao Solar" />
               </label>
             </div>
@@ -155,6 +155,16 @@
             <label>
               Arte base
               <select id="pokeLook"></select>
+            </label>
+
+            <label>
+              Link da imagem
+              <input id="pokeImageUrl" type="url" maxlength="240" placeholder="https://..." />
+            </label>
+
+            <label class="check-line">
+              <input id="pokeRepeated" type="checkbox" />
+              Carta repetida
             </label>
 
             <div class="button-row">
@@ -239,8 +249,8 @@
             <label>
               Regra
               <select id="duelMode">
-                <option value="standard">Padrao - 4000 LP</option>
-                <option value="rapid">Rapido - 2500 LP</option>
+                <option value="standard">Padrão - 4000 LP</option>
+                <option value="rapid">Rápido - 2500 LP</option>
                 <option value="boss">Chefe - 5000 LP</option>
               </select>
             </label>

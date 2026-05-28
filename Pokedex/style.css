@@ -54,6 +54,18 @@ select {
   font: inherit;
 }
 
+.check-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+}
+
+.check-line input {
+  width: 18px;
+  height: 18px;
+}
+
 .topbar {
   position: sticky;
   top: 0;
@@ -443,6 +455,30 @@ select:focus {
   box-shadow: 0 34px 70px rgba(8,17,38,.36);
 }
 
+.card.favorite {
+  box-shadow:
+    0 0 0 5px rgba(255,216,77,.42),
+    0 34px 70px rgba(8,17,38,.34);
+}
+
+.card.favorite .type-frame {
+  filter: saturate(1.28) brightness(1.08);
+}
+
+.card.trade {
+  background:
+    linear-gradient(145deg, rgba(236,253,245,.94), rgba(219,234,254,.86)),
+    var(--type-grad);
+}
+
+.card.trade::before {
+  border-color: rgba(34,197,94,.72);
+}
+
+.card.repeated {
+  opacity: .92;
+}
+
 .card.active {
   outline: 4px solid #ffffff;
   outline-offset: 4px;
@@ -729,18 +765,22 @@ select:focus {
 
 .badges {
   display: flex;
-  gap: 6px;
+  gap: 7px;
   flex-wrap: wrap;
 }
 
 .badge {
-  padding: 5px 9px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 5px 11px;
   border-radius: 999px;
   background: var(--type-color);
   color: white;
-  font-size: .78rem;
+  font-size: .8rem;
   font-weight: 1000;
   border: 1px solid rgba(0,0,0,.25);
+  white-space: nowrap;
 }
 
 .rarity-badge {
@@ -750,6 +790,18 @@ select:focus {
 .level-badge {
   background: white;
   color: var(--navy);
+}
+
+.duplicate-badge {
+  background: #0f172a;
+}
+
+.trade-badge {
+  background: #16a34a;
+}
+
+.favorite-badge {
+  background: #d97706;
 }
 
 .card-stats {
@@ -786,9 +838,33 @@ select:focus {
 
 .card-actions {
   display: grid;
-  grid-template-columns: 1fr 46px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   margin-top: 12px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.card-actions .btn {
+  min-width: 0;
+  min-height: 42px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 14px;
+  font-size: .8rem;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-actions .select-btn {
+  font-size: .78rem;
+  letter-spacing: 0;
+}
+
+.card-actions .danger {
+  grid-column: auto;
 }
 
 .selected-preview {
@@ -854,25 +930,45 @@ select:focus {
 
 .move-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px,1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr));
+  gap: 18px;
 }
 
 .move-card {
-  padding: 16px;
-  border-radius: 22px;
-  background: rgba(255,255,255,.72);
-  box-shadow: var(--shadow);
-  border: 1px solid rgba(255,255,255,.45);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 18px;
+  border-radius: 24px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.92), rgba(238,246,255,.78)),
+    radial-gradient(circle at 100% 0, rgba(59,130,246,.28), transparent 34%);
+  box-shadow: 0 18px 42px rgba(8,17,38,.18);
+  border: 1px solid rgba(255,255,255,.72);
+}
+
+.move-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(239,51,64,.14), transparent 38%),
+    repeating-linear-gradient(135deg, rgba(59,130,246,.12) 0 8px, transparent 8px 18px);
 }
 
 .move-card h3 {
   margin: 0;
+  color: var(--navy);
+  font-size: clamp(1.05rem, 1.5vw, 1.35rem);
+  line-height: 1.15;
+  overflow-wrap: anywhere;
 }
 
 .move-card p {
   color: var(--muted);
   font-weight: 800;
+  margin: 14px 0;
 }
 
 .move-meters {
@@ -884,8 +980,20 @@ select:focus {
 
 .training-actions {
   display: grid;
-  grid-template-columns: repeat(3,1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+}
+
+.training-actions .btn {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 9px 8px;
+  border-radius: 15px;
+  font-size: .92rem;
+  line-height: 1.05;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .arena-options {

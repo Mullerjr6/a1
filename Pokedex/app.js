@@ -161,6 +161,17 @@ function escapar(valor) {
     .replace(/'/g, "&#039;");
 }
 
+function urlImagemSegura(valor) {
+  const texto = limitarTexto(valor, 240, "");
+  if (!texto) return "";
+  try {
+    const url = new URL(texto);
+    return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+
 function artePokemon(id) {
   return `${BASE_ARTE}/${id}.png`;
 }
@@ -209,6 +220,10 @@ function normalizarCarta(carta) {
   nova.exp = limitarNumero(nova.exp, 0, 9999, 0);
   nova.energy = limitarNumero(nova.energy || nova.energia, 0, 100, 100);
   nova.imageId = nova.imageId ? Number(nova.imageId) : null;
+  nova.imageUrl = urlImagemSegura(nova.imageUrl || nova.imagemUrl || nova.urlImagem);
+  nova.repeated = Boolean(nova.repeated || nova.repetida);
+  nova.favorite = Boolean(nova.favorite || nova.favorita);
+  nova.forTrade = Boolean(nova.forTrade || nova.paraTroca);
   nova.moves = Array.isArray(nova.moves) && nova.moves.length ? nova.moves : golpesBase(nova);
   nova.moves = nova.moves.slice(0, 4).map((golpe, indice) => ({
     id: golpe.id || `${nova.id}-${indice}`,
@@ -241,7 +256,6 @@ function carregarCartas() {
   }
   let lista = Array.isArray(salvas) ? salvas.map(normalizarCarta) : comIds(pokemonsBase);
   if (!lista.length) lista = comIds(pokemonsBase);
-  lista = juntarBase(lista);
   salvarCartas(lista);
   return lista;
 }
@@ -301,6 +315,9 @@ function estiloTipo(carta) {
 }
 
 function arteCarta(carta) {
+  if (carta.imageUrl) {
+    return `<img src="${escapar(carta.imageUrl)}" alt="${escapar(carta.name)}" loading="lazy">`;
+  }
   if (carta.imageId) {
     return `<img src="${artePokemon(carta.imageId)}" alt="${escapar(carta.name)}" loading="lazy">`;
   }
@@ -314,7 +331,7 @@ function renderizarCarta(cartaOriginal, opcoes = {}) {
   const selecionavel = opcoes.selecionavel !== false;
   const removivel = opcoes.removivel !== false && carta.origin !== "base";
   return `
-    <article class="card ${classeBrilho(carta)} rarity-${slug(raridadeCarta(carta))} type-${slug(carta.type)} ${opcoes.ativa ? "active" : ""}" style="${estiloTipo(carta)}">
+    <article class="card ${classeBrilho(carta)} rarity-${slug(raridadeCarta(carta))} type-${slug(carta.type)} ${opcoes.ativa ? "active" : ""} ${carta.favorite ? "favorite" : ""} ${carta.forTrade ? "trade" : ""} ${carta.repeated ? "repeated" : ""}" style="${estiloTipo(carta)}">
       <span class="type-frame" aria-hidden="true"></span>
       <div class="card-top">
         <div>
@@ -326,9 +343,12 @@ function renderizarCarta(cartaOriginal, opcoes = {}) {
       </div>
       <div class="pokemon-art">${arteCarta(carta)}</div>
       <div class="badges">
-        <span class="badge">${tipo.sigla} ${escapar(carta.type)}</span>
+        <span class="badge">${escapar(carta.type)}</span>
         <span class="badge rarity-badge">${escapar(raridadeCarta(carta))}</span>
         <span class="badge level-badge">Nv. ${carta.level}</span>
+        ${carta.repeated ? `<span class="badge duplicate-badge">Repetida</span>` : ""}
+        ${carta.favorite ? `<span class="badge favorite-badge">Favorita</span>` : ""}
+        ${carta.forTrade ? `<span class="badge trade-badge">Troca</span>` : ""}
       </div>
       <div class="card-stats">
         <div class="card-stat"><span>ATQ</span>${carta.attack}</div>
@@ -339,11 +359,126 @@ function renderizarCarta(cartaOriginal, opcoes = {}) {
         <div class="move"><strong>${escapar(golpe.name)}</strong><br>${escapar(golpe.category)} - Poder ${golpe.power}</div>
       `).join("")}
       <div class="card-actions">
-        ${selecionavel ? `<button class="btn" data-select="${carta.id}">Selecionar</button>` : ""}
-        ${removivel ? `<button class="btn danger" data-delete="${carta.id}" title="Excluir">X</button>` : ""}
+        ${selecionavel ? `<button class="btn select-btn" data-select="${carta.id}">Selecionar</button>` : ""}
+        ${selecionavel ? `<button class="btn secondary" data-favorite="${carta.id}">${carta.favorite ? "Favorita" : "Favoritar"}</button>` : ""}
+        ${selecionavel ? `<button class="btn secondary" data-trade="${carta.id}">${carta.forTrade ? "Em troca" : "Trocar"}</button>` : ""}
+        ${removivel ? `<button class="btn danger" data-delete="${carta.id}" title="Excluir">Lixeira</button>` : ""}
       </div>
     </article>
   `;
+}
+
+function criarElemento(tag, classe, texto) {
+  const elemento = document.createElement(tag);
+  if (classe) elemento.className = classe;
+  if (texto !== undefined) elemento.textContent = texto;
+  return elemento;
+}
+
+function aplicarEstiloCarta(elemento, carta, ativa = false) {
+  const tipo = tipos[carta.type] || tipos.Normal;
+  const raridade = raridades[raridadeCarta(carta)] || raridades.Comum;
+  elemento.className = [
+    "card",
+    classeBrilho(carta),
+    `rarity-${slug(raridadeCarta(carta))}`,
+    `type-${slug(carta.type)}`,
+    ativa ? "active" : "",
+    carta.favorite ? "favorite" : "",
+    carta.forTrade ? "trade" : "",
+    carta.repeated ? "repeated" : ""
+  ].filter(Boolean).join(" ");
+  elemento.style.setProperty("--type-color", tipo.cor);
+  elemento.style.setProperty("--type-grad", `linear-gradient(145deg, ${tipo.gradiente.join(",")})`);
+  elemento.style.setProperty("--rarity-color", raridade.cor);
+  elemento.style.setProperty("--foil", Math.min(0.75, 0.16 + raridade.nivel * 0.09));
+}
+
+function criarArteCarta(carta) {
+  const caixa = criarElemento("div", "pokemon-art");
+  if (carta.imageUrl || carta.imageId) {
+    const imagem = document.createElement("img");
+    imagem.src = carta.imageUrl || artePokemon(carta.imageId);
+    imagem.alt = carta.name;
+    imagem.loading = "lazy";
+    caixa.appendChild(imagem);
+  } else {
+    caixa.appendChild(criarElemento("span", "custom-mon"));
+  }
+  return caixa;
+}
+
+function criarBotaoCarta(texto, classe, atributo, valor, titulo) {
+  const botao = criarElemento("button", classe, texto);
+  botao.type = "button";
+  botao.dataset[atributo] = valor;
+  if (titulo) botao.title = titulo;
+  return botao;
+}
+
+function construirCartaColecao(cartaOriginal, opcoes = {}) {
+  const carta = normalizarCarta(cartaOriginal);
+  const tipo = tipos[carta.type] || tipos.Normal;
+  const raridade = raridades[raridadeCarta(carta)] || raridades.Comum;
+  const artigo = document.createElement("article");
+  artigo.dataset.cardId = carta.id;
+  aplicarEstiloCarta(artigo, carta, opcoes.ativa);
+
+  artigo.appendChild(criarElemento("span", "type-frame"));
+
+  const topo = criarElemento("div", "card-top");
+  const dadosTopo = criarElemento("div");
+  dadosTopo.appendChild(criarElemento("span", "stage", estagioCarta(carta)));
+  const titulo = criarElemento("h4", "", carta.name);
+  titulo.title = carta.name;
+  dadosTopo.appendChild(titulo);
+  const raca = criarElemento("small", "", carta.race);
+  raca.title = carta.race;
+  dadosTopo.appendChild(raca);
+  const hp = criarElemento("div", "hp");
+  hp.appendChild(document.createTextNode(`HP ${carta.hp}`));
+  hp.appendChild(document.createElement("br"));
+  hp.appendChild(criarElemento("small", "", `${tipo.sigla} ${raridade.marca}`));
+  topo.appendChild(dadosTopo);
+  topo.appendChild(hp);
+  artigo.appendChild(topo);
+
+  artigo.appendChild(criarArteCarta(carta));
+
+  const badges = criarElemento("div", "badges");
+  badges.appendChild(criarElemento("span", "badge", carta.type));
+  badges.appendChild(criarElemento("span", "badge rarity-badge", raridadeCarta(carta)));
+  badges.appendChild(criarElemento("span", "badge level-badge", `Nv. ${carta.level}`));
+  if (carta.repeated) badges.appendChild(criarElemento("span", "badge duplicate-badge", "Repetida"));
+  if (carta.favorite) badges.appendChild(criarElemento("span", "badge favorite-badge", "Favorita"));
+  if (carta.forTrade) badges.appendChild(criarElemento("span", "badge trade-badge", "Troca"));
+  artigo.appendChild(badges);
+
+  const estatisticas = criarElemento("div", "card-stats");
+  [["ATQ", carta.attack], ["DEF", carta.defense], ["VEL", carta.speed]].forEach(([nome, valor]) => {
+    const estatistica = criarElemento("div", "card-stat");
+    estatistica.appendChild(criarElemento("span", "", nome));
+    estatistica.appendChild(document.createTextNode(valor));
+    estatisticas.appendChild(estatistica);
+  });
+  artigo.appendChild(estatisticas);
+
+  carta.moves.slice(0, 2).forEach(golpe => {
+    const movimento = criarElemento("div", "move");
+    movimento.appendChild(criarElemento("strong", "", golpe.name));
+    movimento.appendChild(document.createElement("br"));
+    movimento.appendChild(document.createTextNode(`${golpe.category} - Poder ${golpe.power}`));
+    artigo.appendChild(movimento);
+  });
+
+  const acoes = criarElemento("div", "card-actions");
+  acoes.appendChild(criarBotaoCarta("Selecionar", "btn select-btn", "select", carta.id));
+  acoes.appendChild(criarBotaoCarta(carta.favorite ? "Favorita" : "Favoritar", "btn secondary", "favorite", carta.id));
+  acoes.appendChild(criarBotaoCarta(carta.forTrade ? "Em troca" : "Trocar", "btn secondary", "trade", carta.id));
+  acoes.appendChild(criarBotaoCarta("Lixeira", "btn danger", "delete", carta.id, "Excluir"));
+  artigo.appendChild(acoes);
+
+  return artigo;
 }
 
 function cartaSelecionada() {
@@ -352,8 +487,8 @@ function cartaSelecionada() {
 
 function renderizarResumo() {
   document.querySelector("#totalCards").textContent = colecao.length;
-  document.querySelector("#rareCards").textContent = colecao.filter(carta => (raridades[raridadeCarta(carta)]?.nivel || 1) >= 3).length;
-  document.querySelector("#totalPower").textContent = colecao.reduce((soma, carta) => soma + poderTotal(carta), 0);
+  document.querySelector("#duplicateCards").textContent = colecao.filter(carta => carta.repeated).length;
+  document.querySelector("#uniqueCards").textContent = colecao.filter(carta => !carta.repeated).length;
 }
 
 function renderizarPreviaSelecionada(alvo, carta) {
@@ -422,16 +557,37 @@ function renderizarInicio() {
 
 function renderizarColecao() {
   renderizarPreviaSelecionada(document.querySelector("#collectionPreview"), cartaSelecionada());
+  const grade = document.querySelector("#cards");
+  grade.replaceChildren();
+  colecao.forEach(carta => {
+    grade.appendChild(construirCartaColecao(carta, { ativa: carta.id === idSelecionado }));
+  });
+  aplicarFiltroColecao();
+}
+
+function aplicarFiltroColecao() {
   const termo = buscaColecao.trim().toLowerCase();
-  const visiveis = colecao.filter(carta => {
+  let totalVisivel = 0;
+  document.querySelectorAll("#cards .card").forEach(card => {
+    const carta = colecao.find(item => item.id === card.dataset.cardId);
+    if (!carta) return;
     const textoOk = !termo || `${carta.name} ${carta.race}`.toLowerCase().includes(termo);
     const tipoOk = filtroTipo === "Todos" || carta.type === filtroTipo;
     const raridadeOk = filtroRaridade === "Todas" || raridadeCarta(carta) === filtroRaridade;
-    return textoOk && tipoOk && raridadeOk;
+    const visivel = textoOk && tipoOk && raridadeOk;
+    card.style.display = visivel ? "" : "none";
+    if (visivel) totalVisivel += 1;
   });
-  document.querySelector("#cards").innerHTML = visiveis.length
-    ? visiveis.map(carta => renderizarCarta(carta, { ativa: carta.id === idSelecionado })).join("")
-    : `<div class="empty">Nenhuma carta encontrada.</div>`;
+  let vazio = document.querySelector("#cardsEmpty");
+  if (!totalVisivel) {
+    if (!vazio) {
+      vazio = criarElemento("div", "empty", "Nenhuma carta encontrada.");
+      vazio.id = "cardsEmpty";
+      document.querySelector("#cards").appendChild(vazio);
+    }
+  } else {
+    vazio?.remove();
+  }
 }
 
 function dadosPreviaCriacao() {
@@ -449,6 +605,8 @@ function dadosPreviaCriacao() {
     defense: 38 + Math.round(hp * 0.22) + nivelRaridade * 8,
     speed: 36 + Math.round(hp * 0.2) + nivelRaridade * 7,
     imageId: Number(document.querySelector("#pokeLook").value),
+    imageUrl: document.querySelector("#pokeImageUrl").value,
+    repeated: document.querySelector("#pokeRepeated").checked,
     level: 1,
     origin: "custom"
   });
@@ -851,32 +1009,46 @@ function configurarEventos() {
   preencherSelectArte(document.querySelector("#pokeLook"));
   document.querySelector("#searchInput").addEventListener("input", evento => {
     buscaColecao = evento.target.value;
-    renderizarColecao();
-    ativarInclinacaoCartas();
+    aplicarFiltroColecao();
   });
   document.querySelector("#typeFilter").addEventListener("change", evento => {
     filtroTipo = evento.target.value;
-    renderizarColecao();
-    ativarInclinacaoCartas();
+    aplicarFiltroColecao();
   });
   document.querySelector("#rarityFilter").addEventListener("change", evento => {
     filtroRaridade = evento.target.value;
-    renderizarColecao();
-    ativarInclinacaoCartas();
+    aplicarFiltroColecao();
   });
   document.querySelector("#cards").addEventListener("click", evento => {
     const selecionar = evento.target.closest("[data-select]")?.dataset.select;
     const remover = evento.target.closest("[data-delete]")?.dataset.delete;
+    const favorito = evento.target.closest("[data-favorite]")?.dataset.favorite;
+    const troca = evento.target.closest("[data-trade]")?.dataset.trade;
     if (selecionar) {
       idSelecionado = selecionar;
       definirSelecionada(selecionar);
       renderizarTudo();
     }
     if (remover && confirm("Remover esta carta?")) {
+      evento.target.closest(".card")?.remove();
       colecao = colecao.filter(carta => carta.id !== remover);
       idSelecionado = colecao[0]?.id;
       salvarCartas(colecao);
       definirSelecionada(idSelecionado);
+      renderizarTudo();
+    }
+    if (favorito) {
+      const carta = colecao.find(item => item.id === favorito);
+      if (!carta) return;
+      carta.favorite = !carta.favorite;
+      salvarCartas(colecao);
+      renderizarTudo();
+    }
+    if (troca) {
+      const carta = colecao.find(item => item.id === troca);
+      if (!carta) return;
+      carta.forTrade = !carta.forTrade;
+      salvarCartas(colecao);
       renderizarTudo();
     }
   });
@@ -905,13 +1077,15 @@ function configurarEventos() {
     document.querySelector("#pokeRarity").selectedIndex = Math.random() * document.querySelector("#pokeRarity").options.length | 0;
     document.querySelector("#pokeHp").value = 70 + Math.random() * 90 | 0;
     document.querySelector("#pokeLook").selectedIndex = Math.random() * document.querySelector("#pokeLook").options.length | 0;
+    document.querySelector("#pokeImageUrl").value = "";
+    document.querySelector("#pokeRepeated").checked = Math.random() > 0.7;
     renderizarCriacao();
     ativarInclinacaoCartas();
   });
   document.querySelector("#createForm").addEventListener("submit", evento => {
     evento.preventDefault();
     const carta = normalizarCarta({ ...dadosPreviaCriacao(), id: novoId(), origin: "custom" });
-    colecao = [carta, ...carregarCartas()];
+    colecao = [carta, ...colecao];
     salvarCartas(colecao);
     definirSelecionada(carta.id);
     idSelecionado = carta.id;
