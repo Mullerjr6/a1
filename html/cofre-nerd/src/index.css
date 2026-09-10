@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+/* CSS geral da página */
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  color: #f4f4f5;
+  background-color: #18181b;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Fundo usado na área da imagem de cada carta */
+.card-image-area {
+  background: linear-gradient(#27272a, #18181b);
+}
+
+button {
+  cursor: pointer;
+}
