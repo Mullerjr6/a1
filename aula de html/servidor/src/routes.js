@@ -1,8 +1,8 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
+import { banco } from "./base.js";
 
-// Banco de dados em memória
+// Estas entidades ainda usam memória; clientes são persistidos no SQLite.
 const produtos = [];
-const clientes = [];
 const categorias = [];
 const fornecedores = [];
 
@@ -11,38 +11,154 @@ const responderJson = (response, status, dados) => {
   return response.end(JSON.stringify(dados));
 };
 
-const colecoes = {
-  "/clientes": {
-    itens: clientes,
-    chaveResposta: "cliente",
-    validar: (cliente, indiceAtual = -1) => {
-      if (
-        typeof cliente.nome !== "string" ||
-        !cliente.nome.trim() ||
-        typeof cliente.email !== "string" ||
-        !cliente.email.trim() ||
-        typeof cliente.telefone !== "string" ||
-        !cliente.telefone.trim() ||
-        typeof cliente.ativo !== "boolean"
-      ) {
-        return "Dados inválidos. Informe nome, email, telefone e ativo.";
+const validarCliente = (cliente) => {
+  if (
+    typeof cliente.nome !== "string" ||
+    !cliente.nome.trim() ||
+    typeof cliente.email !== "string" ||
+    !cliente.email.trim() ||
+    typeof cliente.telefone !== "string" ||
+    !cliente.telefone.trim() ||
+    typeof cliente.ativo !== "boolean"
+  ) {
+    return "Dados inválidos. Informe nome, email, telefone e ativo.";
+  }
+
+  return null;
+};
+
+const formatarCliente = (cliente) => ({
+  ...cliente,
+  ativo: Boolean(cliente.ativo),
+});
+
+const responderErroBanco = (response, erro) => {
+  console.error("Erro ao acessar o banco de dados:", erro);
+
+  if (erro.code === "SQLITE_CONSTRAINT") {
+    return responderJson(response, 409, {
+      erro: "Já existe um cliente com esse email.",
+    });
+  }
+
+  return responderJson(response, 500, {
+    erro: "Erro interno ao acessar o banco de dados.",
+  });
+};
+
+const manipularClientes = async (request, response) => {
+  const { method, url, body } = request;
+
+  try {
+    if (url === "/clientes" && method === "GET") {
+      const clientes = await banco.all(
+        "SELECT id, nome, email, telefone, ativo FROM clientes ORDER BY nome",
+      );
+      responderJson(response, 200, clientes.map(formatarCliente));
+      return true;
+    }
+
+    if (url === "/clientes" && method === "POST") {
+      const dados = body ?? {};
+      const erroValidacao = validarCliente(dados);
+
+      if (erroValidacao) {
+        responderJson(response, 400, { erro: erroValidacao });
+        return true;
       }
 
-      const emailEmUso = clientes.some(
-        (item, indice) =>
-          indice !== indiceAtual &&
-          item.email.trim().toLowerCase() ===
-            cliente.email.trim().toLowerCase(),
+      const novoCliente = {
+        id: randomUUID(),
+        nome: dados.nome.trim(),
+        email: dados.email.trim(),
+        telefone: dados.telefone.trim(),
+        ativo: dados.ativo,
+      };
+
+      await banco.run(
+        `INSERT INTO clientes (id, nome, email, telefone, ativo)
+         VALUES (?, ?, ?, ?, ?)`,
+        novoCliente.id,
+        novoCliente.nome,
+        novoCliente.email,
+        novoCliente.telefone,
+        Number(novoCliente.ativo),
       );
 
-      return emailEmUso ? "Já existe um cliente com esse email." : null;
-    },
-    statusErro: (mensagem) =>
-      mensagem.startsWith("Já existe") ? 409 : 400,
-    mensagemCriado: "Cliente cadastrado com sucesso!",
-    mensagemAtualizado: "Cliente atualizado com sucesso!",
-    mensagemRemovido: "Cliente removido com sucesso!",
-  },
+      responderJson(response, 201, {
+        mensagem: "Cliente cadastrado com sucesso!",
+        cliente: novoCliente,
+      });
+      return true;
+    }
+
+    const partesUrl = url.split("/");
+    const rotaComId =
+      url.startsWith("/clientes/") && partesUrl.length === 3;
+
+    if (!rotaComId) return false;
+
+    const id = partesUrl[2];
+    const clienteAtual = await banco.get(
+      "SELECT id, nome, email, telefone, ativo FROM clientes WHERE id = ?",
+      id,
+    );
+
+    if (!clienteAtual) {
+      responderJson(response, 404, { erro: "Registro não encontrado." });
+      return true;
+    }
+
+    if (method === "PUT") {
+      const clienteAtualizado = {
+        ...formatarCliente(clienteAtual),
+        ...(body ?? {}),
+        id,
+      };
+      const erroValidacao = validarCliente(clienteAtualizado);
+
+      if (erroValidacao) {
+        responderJson(response, 400, { erro: erroValidacao });
+        return true;
+      }
+
+      clienteAtualizado.nome = clienteAtualizado.nome.trim();
+      clienteAtualizado.email = clienteAtualizado.email.trim();
+      clienteAtualizado.telefone = clienteAtualizado.telefone.trim();
+
+      await banco.run(
+        `UPDATE clientes
+         SET nome = ?, email = ?, telefone = ?, ativo = ?
+         WHERE id = ?`,
+        clienteAtualizado.nome,
+        clienteAtualizado.email,
+        clienteAtualizado.telefone,
+        Number(clienteAtualizado.ativo),
+        id,
+      );
+
+      responderJson(response, 200, {
+        mensagem: "Cliente atualizado com sucesso!",
+        cliente: clienteAtualizado,
+      });
+      return true;
+    }
+
+    if (method === "DELETE") {
+      await banco.run("DELETE FROM clientes WHERE id = ?", id);
+      response.writeHead(204);
+      response.end();
+      return true;
+    }
+
+    return false;
+  } catch (erro) {
+    responderErroBanco(response, erro);
+    return true;
+  }
+};
+
+const colecoes = {
   "/categorias": {
     itens: categorias,
     chaveResposta: "categoria",
@@ -55,7 +171,6 @@ const colecoes = {
         : "Dados inválidos. Informe nome e descrição.",
     mensagemCriado: "Categoria cadastrada com sucesso!",
     mensagemAtualizado: "Categoria atualizada com sucesso!",
-    mensagemRemovido: "Categoria removida com sucesso!",
   },
   "/fornecedores": {
     itens: fornecedores,
@@ -81,7 +196,6 @@ const colecoes = {
     },
     mensagemCriado: "Fornecedor cadastrado com sucesso!",
     mensagemAtualizado: "Fornecedor atualizado com sucesso!",
-    mensagemRemovido: "Fornecedor removido com sucesso!",
   },
 };
 
@@ -90,7 +204,8 @@ const manipularColecao = (request, response, caminho, configuracao) => {
   const { itens, validar } = configuracao;
 
   if (url === caminho && method === "GET") {
-    return responderJson(response, 200, itens);
+    responderJson(response, 200, itens);
+    return true;
   }
 
   if (url === caminho && method === "POST") {
@@ -98,17 +213,17 @@ const manipularColecao = (request, response, caminho, configuracao) => {
     const erro = validar(dados);
 
     if (erro) {
-      const status = configuracao.statusErro?.(erro) ?? 400;
-      return responderJson(response, status, { erro });
+      responderJson(response, 400, { erro });
+      return true;
     }
 
     const novoItem = { ...dados, id: randomUUID() };
     itens.push(novoItem);
-
-    return responderJson(response, 201, {
+    responderJson(response, 201, {
       mensagem: configuracao.mensagemCriado,
       [configuracao.chaveResposta]: novoItem,
     });
+    return true;
   }
 
   const partesUrl = url.split("/");
@@ -117,7 +232,8 @@ const manipularColecao = (request, response, caminho, configuracao) => {
     const indice = itens.findIndex((item) => item.id === id);
 
     if (indice === -1) {
-      return responderJson(response, 404, { erro: "Registro não encontrado." });
+      responderJson(response, 404, { erro: "Registro não encontrado." });
+      return true;
     }
 
     if (method === "PUT") {
@@ -125,116 +241,116 @@ const manipularColecao = (request, response, caminho, configuracao) => {
       const erro = validar(itemAtualizado, indice);
 
       if (erro) {
-        const status = configuracao.statusErro?.(erro) ?? 400;
-        return responderJson(response, status, { erro });
+        responderJson(response, 400, { erro });
+        return true;
       }
 
       itens[indice] = itemAtualizado;
-      return responderJson(response, 200, {
+      responderJson(response, 200, {
         mensagem: configuracao.mensagemAtualizado,
         [configuracao.chaveResposta]: itemAtualizado,
       });
+      return true;
     }
 
     if (method === "DELETE") {
       itens.splice(indice, 1);
       response.writeHead(204);
-      return response.end();
+      response.end();
+      return true;
     }
   }
 
   return false;
 };
 
-export const manipuladorDeRotas = (request, response) => {
-  for (const [caminho, configuracao] of Object.entries(colecoes)) {
-    const resposta = manipularColecao(request, response, caminho, configuracao);
-    if (resposta !== false) return resposta;
-  }
-
+const manipularProdutos = (request, response) => {
   const { method, url, body } = request;
   const dados = body ?? {};
 
-  // 1. READ (Listar todos os produtos)
   if (url === "/produtos" && method === "GET") {
-    return responderJson(response, 200, produtos);
+    responderJson(response, 200, produtos);
+    return true;
   }
 
-  // 2. CREATE (Cadastrar um novo produto)
   if (url === "/produtos" && method === "POST") {
     const { nome, preco, categoria } = dados;
 
     if (!nome || preco === undefined || !categoria) {
-      return responderJson(response, 400, { erro: "Dados inválidos." });
+      responderJson(response, 400, { erro: "Dados inválidos." });
+      return true;
     }
 
     if (!categorias.some((item) => item.id === categoria)) {
-      return responderJson(response, 400, {
+      responderJson(response, 400, {
         erro: "A categoria informada não existe.",
       });
+      return true;
     }
 
-    const novoProduto = {
-      id: randomUUID(),
-      nome,
-      preco,
-      categoria,
-    };
-
+    const novoProduto = { id: randomUUID(), nome, preco, categoria };
     produtos.push(novoProduto);
-
-    return responderJson(response, 201, {
+    responderJson(response, 201, {
       mensagem: "Produto cadastrado com sucesso!",
       produto: novoProduto,
     });
+    return true;
   }
 
-  // Rotas com parâmetro (Ex: /produtos/123-456-789)
   const partesUrl = url.split("/");
-  const isRotaProdutoComId =
-    url.startsWith("/produtos/") && partesUrl.length === 3;
-
-  if (isRotaProdutoComId) {
+  if (url.startsWith("/produtos/") && partesUrl.length === 3) {
     const id = partesUrl[2];
-    const indexProduto = produtos.findIndex((produto) => produto.id === id);
+    const indice = produtos.findIndex((produto) => produto.id === id);
 
-    if (indexProduto === -1) {
-      return responderJson(response, 404, {
-        erro: "Produto não encontrado.",
-      });
+    if (indice === -1) {
+      responderJson(response, 404, { erro: "Produto não encontrado." });
+      return true;
     }
 
     if (method === "PUT") {
-      const { nome, preco, categoria } = body ?? {};
       const produtoAtualizado = {
-        ...produtos[indexProduto],
-        nome: nome ?? produtos[indexProduto].nome,
-        preco: preco ?? produtos[indexProduto].preco,
-        categoria: categoria ?? produtos[indexProduto].categoria,
+        ...produtos[indice],
+        nome: dados.nome ?? produtos[indice].nome,
+        preco: dados.preco ?? produtos[indice].preco,
+        categoria: dados.categoria ?? produtos[indice].categoria,
       };
 
       if (!categorias.some((item) => item.id === produtoAtualizado.categoria)) {
-        return responderJson(response, 400, {
+        responderJson(response, 400, {
           erro: "A categoria informada não existe.",
         });
+        return true;
       }
 
-      produtos[indexProduto] = produtoAtualizado;
-      return responderJson(response, 200, {
+      produtos[indice] = produtoAtualizado;
+      responderJson(response, 200, {
         mensagem: "Produto atualizado com sucesso!",
         produto: produtoAtualizado,
       });
+      return true;
     }
 
     if (method === "DELETE") {
-      produtos.splice(indexProduto, 1);
+      produtos.splice(indice, 1);
       response.writeHead(204);
-      return response.end();
+      response.end();
+      return true;
     }
   }
 
-  // Rota 404 (Fallback)
-  return responderJson(response, 404, {
+  return false;
+};
+
+export const manipuladorDeRotas = async (request, response) => {
+  if (await manipularClientes(request, response)) return;
+
+  for (const [caminho, configuracao] of Object.entries(colecoes)) {
+    if (manipularColecao(request, response, caminho, configuracao)) return;
+  }
+
+  if (manipularProdutos(request, response)) return;
+
+  responderJson(response, 404, {
     erro: "Rota ou método não encontrado.",
   });
 };

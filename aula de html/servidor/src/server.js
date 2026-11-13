@@ -4,7 +4,7 @@ import { manipuladorDeRotas } from "./routes.js";
 
 const server = http.createServer(async (request, response) => {
   await json(request, response);
-  manipuladorDeRotas(request, response);
+  await manipuladorDeRotas(request, response);
 });
 
 server.listen(3000, () => {
